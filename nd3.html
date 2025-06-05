@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Window Launcher</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      overflow-y: auto;
+      font-family: sans-serif;
+      color: white;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    .dashboard {
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      max-width: 600px;
+      margin: 50px auto;
+      border-radius: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .dashboard h1 {
+      text-align: center;
+    }
+    .dashboard label {
+      display: block;
+      margin-top: 10px;
+    }
+    .dashboard input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+    }
+    .dashboard button {
+      margin-top: 15px;
+      width: 48%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .info {
+      margin-top: 20px;
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+
+  <div class="dashboard">
+    <h1>Window Launcher Dashboard</h1>
+
+    <label>Number of Windows (max 100)</label>
+    <input type="number" id="windowCount" value="5" min="1" max="100">
+
+    <label>Window URL</label>
+    <input type="text" id="windowUrl" value="https://example.com">
+
+    <label>Window Width</label>
+    <input type="number" id="windowWidth" value="400">
+
+    <label>Window Height</label>
+    <input type="number" id="windowHeight" value="300">
+
+    <button onclick="launchWindows()" style="background:#28a745;color:white">Open Windows</button>
+    <button onclick="closeWindows()" style="background:#dc3545;color:white">Close All</button>
+
+    <div class="info">
+      <strong>Status:</strong> <span id="status">Idle</span><br>
+      <strong>Open Windows:</strong> <span id="openCount">0</span><br>
+      <strong>RAM Used:</strong> <span id="ramUsage">N/A</span><br>
+      <strong>CPU Load (Simulated):</strong> <span id="cpuUsage">N/A</span>
+    </div>
+
+    <div class="info">
+      <h3>About the Author</h3>
+      <p>Site by: <strong>lmzbab-7amid</strong></p>
+    </div>
+
+    <div class="info">
+      <h3>Contact information</h3>
+      <p>Welcome to the experimental site any kind of these services contact me at the  Email officiel :lmzbab7amid@gmail.com.</p>
+    </div>
+  </div>
+
+  <script>
+    let openedWindows = [];
+
+    function launchWindows() {
+      closeWindows();
+      const count = Math.min(parseInt(document.getElementById('windowCount').value), 100);
+      const url = document.getElementById('windowUrl').value;
+      const width = parseInt(document.getElementById('windowWidth').value);
+      const height = parseInt(document.getElementById('windowHeight').value);
+      for (let i = 0; i < count; i++) {
+        const win = window.open(url, '_blank', `width=${width},height=${height}`);
+        if (win) openedWindows.push(win);
+      }
+      document.getElementById('status').textContent = 'Windows Opened';
+      document.getElementById('openCount').textContent = openedWindows.length;
+    }
+
+    function closeWindows() {
+      for (let win of openedWindows) {
+        if (win && !win.closed) win.close();
+      }
+      openedWindows = [];
+      document.getElementById('status').textContent = 'All Windows Closed';
+      document.getElementById('openCount').textContent = '0';
+    }
+
+    function updatePerformance() {
+      if (performance.memory) {
+        const usedMB = performance.memory.usedJSHeapSize / 1048576;
+        document.getElementById('ramUsage').textContent = usedMB.toFixed(2) + ' MB';
+      } else {
+        document.getElementById('ramUsage').textContent = 'Not supported';
+      }
+      const load = Math.random() * 100;
+      document.getElementById('cpuUsage').textContent = load.toFixed(1) + '%';
+    }
+
+    setInterval(updatePerformance, 2000);
+
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = '01ABCDEFGHIJKLMNOPQRSTUVXYZ!@#$%^&*';
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0F0';
+      ctx.font = fontSize + 'px monospace';
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 50);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
